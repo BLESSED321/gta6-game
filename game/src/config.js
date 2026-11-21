@@ -2,7 +2,7 @@
 // open-world crime game in the spirit of GTA 6. The camera shows a 1280x720
 // window onto a much larger city; the simulation runs in fixed 1/60 s steps,
 // so no rule below depends on the screen size or the display's frame rate.
-// Re-authored under the new recording: a second safehouse, a gentler police
+// Re-authored under recording 3: a second safehouse, a gentler police
 // ram, and a faster wanted decay when hidden, so a getaway stays winnable.
 
 /** The city is this big, in world pixels; the camera shows 1280x720 of it. */

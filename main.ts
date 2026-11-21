@@ -10,7 +10,7 @@
 // cars and foot cops, money, health, a HUD with minimap and a speedometer, two
 // safehouses for the getaway mission, title / pause / busted-or-wasted
 // screens, and a best score in localStorage. Re-authored in a fresh recorded
-// session for the new recording: every game file was rewritten here by the
+// session for recording 3: every game file was rewritten here by the
 // agent, with a second safehouse, gentler police rams and faster wanted decay,
 // and the screenshots were regenerated from the rewritten game.
 // Put 3 or 4 PNG or JPEG screenshots in screenshots/ (the first by name is

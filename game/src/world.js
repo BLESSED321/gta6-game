@@ -3,8 +3,9 @@
 // police, a wanted system, missions, money and health. step() advances one
 // fixed step and returns what happened as bit flags, so the caller can react
 // without the world knowing about screens or sound.
-// Re-authored: two safehouses — the Getaway mission ends at whichever one the
-// player reaches — and police rams use the gentler WANTED.ramDamage.
+// Re-authored under recording 3: two safehouses — the Getaway mission ends
+// at whichever one the player reaches — and police rams use the gentler
+// WANTED.ramDamage.
 import { CAR_SIZE, CAR_TYPES, CROWD, HEALTH, MISSIONS, PLAYER, ROADS, SAFEHOUSES, WANTED, WORLD } from './config.js';
 
 export const EVENT_HIT = 1;

@@ -2,8 +2,9 @@
 // the minimap. The 1280x720 logical playfield is scaled to fit the window and
 // centred, the margin filled with the backdrop colour. Flat colours and
 // canvas shapes only — no images, no network.
-// Re-authored: both safehouses are drawn, the wanted stars carry a WANTED
-// label, and driving shows a speedometer bar as well as the mph number.
+// Re-authored under recording 3: both safehouses are drawn, the wanted stars
+// carry a WANTED label, and driving shows a speedometer bar as well as the
+// mph number.
 import { CAR_SIZE, FIELD, FONT, PALETTE, ROADS, WANTED, WORLD } from './config.js';
 
 export const SCREEN_TITLE = 'title';

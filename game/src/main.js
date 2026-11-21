@@ -6,6 +6,7 @@
 // ?seed=N fixes the city's layout and traffic. ?shot=start|play|end (with
 // &seed=N) stages that scene instead of running the loop, paints it twice and
 // sets window.__shotReady for a screenshot.
+// Re-authored under recording 3.
 import { BEST_KEY, STEP } from './config.js';
 import { createRandom } from './random.js';
 import { createWorld, EVENT_CASH, EVENT_HIT, EVENT_MISSION, EVENT_OVER, EVENT_WANTED } from './world.js';

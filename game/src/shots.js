@@ -3,6 +3,7 @@
 // is what a short game really looks like and the same seed always gives the
 // same frame. The play shot now keeps driving after the pickup, toward the
 // docks, so the frame shows the delivery leg with the police still in pursuit.
+// Re-authored under recording 3.
 import { STEP } from './config.js';
 import { SCREEN_OVER, SCREEN_PLAY, SCREEN_TITLE } from './render.js';
 
