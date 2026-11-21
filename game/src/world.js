@@ -3,7 +3,9 @@
 // police, a wanted system, missions, money and health. step() advances one
 // fixed step and returns what happened as bit flags, so the caller can react
 // without the world knowing about screens or sound.
-import { CAR_SIZE, CAR_TYPES, CROWD, HEALTH, MISSIONS, PLAYER, ROADS, WANTED, WORLD } from './config.js';
+// Re-authored: two safehouses — the Getaway mission ends at whichever one the
+// player reaches — and police rams use the gentler WANTED.ramDamage.
+import { CAR_SIZE, CAR_TYPES, CROWD, HEALTH, MISSIONS, PLAYER, ROADS, SAFEHOUSES, WANTED, WORLD } from './config.js';
 
 export const EVENT_HIT = 1;
 export const EVENT_CASH = 2;
@@ -54,6 +56,16 @@ function nearestRoadPoint(x, y) {
   }
   return best;
 }
+/** Whichever safehouse is nearer to (x, y). */
+function nearestSafehouse(x, y) {
+  let best = SAFEHOUSES[0];
+  let bestD = dist(x, y, best.x, best.y);
+  for (const s of SAFEHOUSES) {
+    const d = dist(x, y, s.x, s.y);
+    if (d < bestD) { bestD = d; best = s; }
+  }
+  return best;
+}
 
 export function createWorld(random) {
   // ---- City layout (deterministic from the seed) -------------------------
@@ -88,7 +100,8 @@ export function createWorld(random) {
   }
   // Fixed landmarks, so missions always have somewhere to point at.
   const docks = { x: 3050, y: 1500 };
-  const safehouse = { x: 400, y: 2200 };
+  const safehouse = SAFEHOUSES[0];
+  const safehouse2 = SAFEHOUSES[1];
   const sprayShop = { x: 1600, y: 2200 };
   const pickupSpot = { x: 2200, y: 1000 };
 
@@ -102,7 +115,7 @@ export function createWorld(random) {
   const pickups = [];
   const state = {
     player, cars, peds, pickups, buildings, parks, water,
-    docks, safehouse, sprayShop, pickupSpot,
+    docks, safehouse, safehouse2, sprayShop, pickupSpot,
     money: 0, score: 0, elapsed: 0,
     wanted: 0, lastCrime: -999, hideTimer: 0, policeTimer: 0,
     missionIndex: 0, missionStage: 'steal', bags: 0, bagsTotal: 3,
@@ -188,7 +201,8 @@ export function createWorld(random) {
     } else if (index === 2) {
       state.missionStage = 'escape';
       addCrime(2);
-      setMarker(safehouse.x, safehouse.y, 'Reach the safehouse', '#f2c94c');
+      const near = nearestSafehouse(player.x, player.y);
+      setMarker(near.x, near.y, 'Reach a safehouse', '#f2c94c');
       setToast(`Mission ${def.id}: ${def.name} — ${def.brief}`);
     } else if (index === 3) {
       state.missionStage = 'bags';
@@ -462,7 +476,7 @@ export function createWorld(random) {
     if (player.inCar && car.ramCd <= 0) {
       const pc = player.inCar;
       if (dist(car.x, car.y, pc.x, pc.y) < 52) {
-        pc.health -= 6;
+        pc.health -= WANTED.ramDamage;
         pc.speed *= 0.9;
         car.ramCd = 1.2;
         car.speed *= 0.7;
@@ -686,6 +700,17 @@ export function createWorld(random) {
         }
       }
     }
+    // Escape also completes at the OTHER safehouse, not only the marked one.
+    if (!harmless && state.missionStage === 'escape' && !state.over) {
+      for (const s of SAFEHOUSES) {
+        if (dist(player.x, player.y, s.x, s.y) < 60) {
+          state.wanted = 0;
+          completeMission();
+          events |= EVENT_MISSION;
+          break;
+        }
+      }
+    }
 
     // --- Wanted: spawn police, decay when hidden ---------------------------
     if (!harmless && state.wanted > 0) {
@@ -753,6 +778,6 @@ export function createWorld(random) {
   reset();
   return {
     state, reset, step, enterCar, punch, placePlayer, forceOver, setWanted,
-    setMarker, startMission, debugInfo,
+    setMarker, startMission, debugInfo, nearestSafehouse,
   };
 }

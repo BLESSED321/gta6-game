@@ -2,7 +2,8 @@
 // (WASD or arrows) and driving (W/S throttle, A/D steering); one-shot presses
 // (start/restart, pause, enter/exit car, punch) are queued as bit flags and
 // taken once by the loop, so a press between two frames is never lost and
-// never counted twice.
+// never counted twice. R also confirms / restarts, for players who reach for
+// it after being busted or wasted.
 
 export const ACTION_CONFIRM = 1;
 export const ACTION_PAUSE = 2;
@@ -13,7 +14,7 @@ const UP = new Set(['ArrowUp', 'KeyW']);
 const DOWN = new Set(['ArrowDown', 'KeyS']);
 const LEFT = new Set(['ArrowLeft', 'KeyA']);
 const RIGHT = new Set(['ArrowRight', 'KeyD']);
-const CONFIRM = new Set(['Space', 'Enter']);
+const CONFIRM = new Set(['Space', 'Enter', 'KeyR']);
 const PAUSE = new Set(['KeyP', 'Escape']);
 const ENTER = new Set(['KeyE']);
 const PUNCH = new Set(['KeyF']);

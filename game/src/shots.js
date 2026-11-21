@@ -1,7 +1,8 @@
 // The screenshot scenes behind ?shot=start|play|end. Each one plays the real
 // rules forward from a fresh world, steered by a simple autopilot, so the frame
 // is what a short game really looks like and the same seed always gives the
-// same frame.
+// same frame. The play shot now keeps driving after the pickup, toward the
+// docks, so the frame shows the delivery leg with the police still in pursuit.
 import { STEP } from './config.js';
 import { SCREEN_OVER, SCREEN_PLAY, SCREEN_TITLE } from './render.js';
 
@@ -98,6 +99,14 @@ export function stageShot(name, world) {
       if (!m) break;
       world.step(STEP, driveToward(state, m.x, m.y), false);
       if (state.over) break;
+    }
+    // Roll a short way into the delivery leg, then stop: driving the whole
+    // way to the docks cuts across city blocks and wedges the car against a
+    // building, so the frame is taken while the car is still on the road,
+    // package collected, police in pursuit.
+    const docks = state.docks;
+    for (let i = 0; i < 2 / STEP && state.missionStage === 'deliver' && !state.over; i += 1) {
+      world.step(STEP, driveToward(state, docks.x, docks.y), false);
     }
     return { screen: SCREEN_PLAY, best: state.score };
   }

@@ -2,6 +2,8 @@
 // the minimap. The 1280x720 logical playfield is scaled to fit the window and
 // centred, the margin filled with the backdrop colour. Flat colours and
 // canvas shapes only — no images, no network.
+// Re-authored: both safehouses are drawn, the wanted stars carry a WANTED
+// label, and driving shows a speedometer bar as well as the mph number.
 import { CAR_SIZE, FIELD, FONT, PALETTE, ROADS, WANTED, WORLD } from './config.js';
 
 export const SCREEN_TITLE = 'title';
@@ -93,11 +95,15 @@ export function createRenderer(canvas) {
         }
       }
     }
-    // Docks, safehouse and Pay 'N Spray, labelled on the ground.
+    // Docks, both safehouses and Pay 'N Spray, labelled on the ground.
     rect(state.docks.x - 60, state.docks.y - 40, 120, 80, '#5b4a2e');
     text('DOCKS', state.docks.x, state.docks.y + 6, 20, '#f2c94c', 'center', 'middle');
     rect(state.safehouse.x - 50, state.safehouse.y - 34, 100, 68, '#2e4a3a');
     text('SAFEHOUSE', state.safehouse.x, state.safehouse.y + 6, 16, '#4ade80', 'center', 'middle');
+    if (state.safehouse2) {
+      rect(state.safehouse2.x - 50, state.safehouse2.y - 34, 100, 68, '#2e4a3a');
+      text('SAFEHOUSE 2', state.safehouse2.x, state.safehouse2.y + 6, 15, '#4ade80', 'center', 'middle');
+    }
     rect(state.sprayShop.x - 50, state.sprayShop.y - 34, 100, 68, '#4a2e5b');
     text("PAY 'N SPRAY", state.sprayShop.x, state.sprayShop.y + 6, 15, '#e8a34c', 'center', 'middle');
   }
@@ -212,7 +218,8 @@ export function createRenderer(canvas) {
     // Health bar.
     rect(24, 88, 180, 12, '#3a2026');
     rect(24, 88, 180 * Math.max(0, p.health / 100), 12, p.health > 30 ? '#4ade80' : '#ff5d73');
-    // Wanted stars, top centre.
+    // Wanted stars, top centre, with a label so the row reads at a glance.
+    text('WANTED', 640, 16, 13, state.wanted > 0 ? '#ff5d73' : 'rgba(238,241,245,0.5)', 'center', 'middle');
     const stars = state.wanted;
     for (let i = 0; i < WANTED.maxStars; i += 1) {
       text('★', 590 + i * 30, 40, 28, i < stars ? '#ffd23b' : 'rgba(255,255,255,0.25)', 'center', 'middle');
@@ -223,7 +230,12 @@ export function createRenderer(canvas) {
       : 'All missions complete — free roam!';
     text(mission, 640, 66, 18, '#eef1f5', 'center', 'middle');
     if (p.inCar) {
-      text(`${p.inCar.type.toUpperCase()}  •  ${Math.round(Math.abs(p.inCar.speed) * 0.2)} mph`, 640, 92, 16, PALETTE.muted, 'center', 'middle');
+      const mph = Math.round(Math.abs(p.inCar.speed) * 0.2);
+      const topMph = Math.round(p.inCar.topSpeed * 0.2);
+      text(`${p.inCar.type.toUpperCase()}  •  ${mph} mph`, 640, 92, 16, PALETTE.muted, 'center', 'middle');
+      // Speedometer bar: the car's speed as a share of its top speed.
+      rect(540, 102, 200, 8, 'rgba(255,255,255,0.18)');
+      rect(540, 102, 200 * Math.min(1, Math.abs(p.inCar.speed) / p.inCar.topSpeed), 8, mph > topMph * 0.85 ? '#ff5d73' : '#4ade80');
     }
     // Toast.
     if (state.toastTimer > 0 && state.toast) {
@@ -233,7 +245,7 @@ export function createRenderer(canvas) {
       text(state.toast, 640, 646, 18, '#eef1f5', 'center', 'middle');
     }
     // Controls hint, bottom-left.
-    text('WASD move/drive  •  E enter car  •  F punch  •  Shift run  •  P pause', 16, 700, 15, 'rgba(238,241,245,0.65)', 'left', 'middle');
+    text('WASD move/drive  •  E enter car  •  F punch  •  Shift run  •  P pause  •  R restart', 16, 700, 15, 'rgba(238,241,245,0.65)', 'left', 'middle');
     drawMinimap(state);
   }
 
@@ -315,7 +327,7 @@ export function createRenderer(canvas) {
         'A GTA-style open world: steal cars, run missions,',
         'outrun the cops and make your fortune in Leonida.',
         'WASD to move and drive  •  E to enter a car  •  F to punch',
-        'Complete all 4 missions. Watch your wanted stars.',
+        '4 missions  •  5-star wanted  •  2 safehouses  •  free roam',
       ], 'Press Space or click to start', best);
       return;
     }
@@ -328,7 +340,7 @@ export function createRenderer(canvas) {
         busted ? 'The Leonida PD caught you.' : 'You did not survive Leonida.',
         `Money  $${state.money}    Score  $${state.score}`,
         `Missions finished: ${Math.min(state.missionIndex, 4)} of 4    Cars stolen: ${state.carsStolen}`,
-      ], 'Press Space or click to play again', best);
+      ], 'Press Space or R to play again', best);
     }
   }
 

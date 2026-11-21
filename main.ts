@@ -7,9 +7,14 @@
 // a top-down open-world crime game in the spirit of GTA 6: a city larger than
 // the screen with roads, buildings, parks and water; walk or drive (steal
 // cars, 4 car types), 4 missions with markers, a wanted system with police
-// cars and foot cops, money, health, a HUD with minimap, title / pause /
-// busted-or-wasted screens, and a best score in localStorage. Put 3 or 4 PNG
-// or JPEG screenshots in screenshots/ (the first by name is the cover) and run it.
+// cars and foot cops, money, health, a HUD with minimap and a speedometer, two
+// safehouses for the getaway mission, title / pause / busted-or-wasted
+// screens, and a best score in localStorage. Re-authored in a fresh recorded
+// session for the new recording: every game file was rewritten here by the
+// agent, with a second safehouse, gentler police rams and faster wanted decay,
+// and the screenshots were regenerated from the rewritten game.
+// Put 3 or 4 PNG or JPEG screenshots in screenshots/ (the first by name is
+// the cover) and run it.
 //
 // Serve it locally with `node serve.ts`, then open http://localhost:8080.
 // Outside the grader's container, MAKEFUN_OUTPUT_DIR stands in for /output:

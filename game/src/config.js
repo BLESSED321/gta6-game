@@ -2,6 +2,8 @@
 // open-world crime game in the spirit of GTA 6. The camera shows a 1280x720
 // window onto a much larger city; the simulation runs in fixed 1/60 s steps,
 // so no rule below depends on the screen size or the display's frame rate.
+// Re-authored under the new recording: a second safehouse, a gentler police
+// ram, and a faster wanted decay when hidden, so a getaway stays winnable.
 
 /** The city is this big, in world pixels; the camera shows 1280x720 of it. */
 export const WORLD = { width: 3200, height: 2400 };
@@ -45,16 +47,23 @@ export const CAR_SIZE = { length: 64, width: 30 };
 export const MISSIONS = [
   { id: 1, name: 'Hot Wheels', brief: 'Steal the red Comet GT parked on Ocean Drive.', reward: 200 },
   { id: 2, name: 'Package Run', brief: 'Pick up the package at the green marker, then deliver it to the docks.', reward: 300 },
-  { id: 3, name: 'Getaway', brief: 'The cops are on you. Lose them and reach the safehouse.', reward: 400 },
+  { id: 3, name: 'Getaway', brief: 'The cops are on you. Lose them and reach either safehouse.', reward: 400 },
   { id: 4, name: 'The Big Score', brief: 'Grab the 3 cash bags around the city and deliver them to the docks.', reward: 500 },
 ];
 
 export const WANTED = {
   maxStars: 5,
   decayDelay: 9, // seconds with no crime and no cop nearby before stars start falling
-  decayInterval: 6, // seconds per star lost while hidden
+  decayInterval: 5, // seconds per star lost while hidden (was 6: getaways felt too slow)
   sprayCost: 100, // Pay 'N Spray clears all stars
+  ramDamage: 5, // police ram damage per shove (was 6)
 };
+
+/** Two safehouses: the Getaway mission ends at whichever is nearer. */
+export const SAFEHOUSES = [
+  { x: 400, y: 2200, label: 'SAFEHOUSE' },
+  { x: 2800, y: 400, label: 'SAFEHOUSE 2' },
+];
 
 export const HEALTH = { max: 100, pickupHeal: 40 };
 

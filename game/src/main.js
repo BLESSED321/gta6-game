@@ -83,8 +83,8 @@ function runGame() {
       saveBest(best);
     }
     announce(world.state.overReason === 'busted'
-      ? `Busted. Score ${world.state.score}. Best ${best}.`
-      : `Wasted. Score ${world.state.score}. Best ${best}.`);
+      ? `Busted. Score ${world.state.score}. Best ${best}. Press R to play again.`
+      : `Wasted. Score ${world.state.score}. Best ${best}. Press R to play again.`);
   }
 
   function handleActions() {
@@ -111,7 +111,9 @@ function runGame() {
       actions: actions & (ACTION_ENTER | ACTION_PUNCH),
     }, false);
     if (events & EVENT_OVER) endGame();
-    else if (events & EVENT_MISSION) announce(`Mission complete. ${world.state.marker ? world.state.marker.label : 'Free roam.'}`);
+    else if (events & EVENT_MISSION) announce(world.state.missionsDone
+      ? `All missions complete. Free roam — score ${world.state.score}.`
+      : `Mission complete. ${world.state.marker ? world.state.marker.label : 'Free roam.'}`);
     else if (events & EVENT_WANTED) announce('The cops saw that!');
     else if (events & EVENT_CASH) announce(`Cash. $${world.state.money}.`);
     else if (events & EVENT_HIT) announce(`Ouch. Health ${Math.round(world.state.player.health)}.`);
