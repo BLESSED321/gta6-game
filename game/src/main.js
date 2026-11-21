@@ -1,13 +1,15 @@
-// Boot and the one loop: input is read every frame, the world advances in fixed 1/60 s steps
-// (several in a slow frame, none in a fast one), and the renderer paints what is there. The game
-// moves between four screens: title, play, paused and game over.
+// Boot and the one loop: input is read every frame, the world advances in fixed
+// 1/60 s steps (several in a slow frame, none in a fast one), and the renderer
+// paints what is there. The game moves between four screens: title, play,
+// paused and game over (busted or wasted).
 //
-// ?seed=N fixes the falling pattern. ?shot=start|play|end (with &seed=N) stages that scene
-// instead of running the loop, paints it twice and sets window.__shotReady for a screenshot.
-import { BEST_KEY, LIVES, STEP } from './config.js';
+// ?seed=N fixes the city's layout and traffic. ?shot=start|play|end (with
+// &seed=N) stages that scene instead of running the loop, paints it twice and
+// sets window.__shotReady for a screenshot.
+import { BEST_KEY, STEP } from './config.js';
 import { createRandom } from './random.js';
-import { createWorld, EVENT_HIT, EVENT_OVER } from './world.js';
-import { ACTION_CONFIRM, ACTION_PAUSE, createInput } from './input.js';
+import { createWorld, EVENT_CASH, EVENT_HIT, EVENT_MISSION, EVENT_OVER, EVENT_WANTED } from './world.js';
+import { ACTION_CONFIRM, ACTION_ENTER, ACTION_PAUSE, ACTION_PUNCH, createInput } from './input.js';
 import { createRenderer, SCREEN_OVER, SCREEN_PAUSED, SCREEN_PLAY, SCREEN_TITLE } from './render.js';
 import { stageShot } from './shots.js';
 
@@ -23,6 +25,9 @@ const canvas = document.getElementById('game');
 const status = document.getElementById('status');
 const world = createWorld(createRandom(seed));
 const renderer = createRenderer(canvas);
+// Play-test hook: the page's state, so a test can check the player moved,
+// a car was entered, a mission advanced, without touching the game itself.
+window.__game = { world, state: world.state };
 
 function readBest() {
   try {
@@ -44,7 +49,7 @@ function runShot(name) {
   const scene = stageShot(name, world);
   let painted = 0;
   function paint() {
-    renderer.draw(world.state, scene.screen, scene.best);
+    renderer.draw(world.state, scene.screen, scene.best, world.state.elapsed);
     painted += 1;
     if (painted < 2) requestAnimationFrame(paint);
     else window.__shotReady = true;
@@ -68,7 +73,7 @@ function runGame() {
     world.reset();
     accumulator = 0;
     screen = SCREEN_PLAY;
-    announce(`Playing. ${LIVES} lives.`);
+    announce('Playing. Steal the red Comet GT — follow the marker.');
   }
 
   function endGame() {
@@ -77,7 +82,9 @@ function runGame() {
       best = world.state.score;
       saveBest(best);
     }
-    announce(`Game over. Score ${world.state.score}. Best ${best}.`);
+    announce(world.state.overReason === 'busted'
+      ? `Busted. Score ${world.state.score}. Best ${best}.`
+      : `Wasted. Score ${world.state.score}. Best ${best}.`);
   }
 
   function handleActions() {
@@ -90,35 +97,43 @@ function runGame() {
       screen = SCREEN_PLAY;
       announce('Playing.');
     }
+    return actions;
   }
 
-  function step() {
+  function step(actions) {
     if (screen === SCREEN_TITLE) {
-      world.step(STEP, 0, true);
+      world.step(STEP, { move: { x: 0, y: 0 }, run: false, actions: 0 }, true);
       return;
     }
-    const events = world.step(STEP, input.direction(), false);
+    const events = world.step(STEP, {
+      move: input.move(),
+      run: input.running(),
+      actions: actions & (ACTION_ENTER | ACTION_PUNCH),
+    }, false);
     if (events & EVENT_OVER) endGame();
-    else if (events & EVENT_HIT) announce(world.state.lives === 1 ? 'Hit. 1 life left.' : `Hit. ${world.state.lives} lives left.`);
+    else if (events & EVENT_MISSION) announce(`Mission complete. ${world.state.marker ? world.state.marker.label : 'Free roam.'}`);
+    else if (events & EVENT_WANTED) announce('The cops saw that!');
+    else if (events & EVENT_CASH) announce(`Cash. $${world.state.money}.`);
+    else if (events & EVENT_HIT) announce(`Ouch. Health ${Math.round(world.state.player.health)}.`);
   }
 
   function frame(now) {
     requestAnimationFrame(frame);
     accumulator += Math.min((now - last) / 1000, MAX_FRAME);
     last = now;
-    handleActions();
+    const actions = handleActions();
     if (screen === SCREEN_TITLE || screen === SCREEN_PLAY) {
       while (accumulator >= STEP && (screen === SCREEN_TITLE || screen === SCREEN_PLAY)) {
-        step();
+        step(actions);
         accumulator -= STEP;
       }
     } else {
       accumulator = 0;
     }
-    renderer.draw(world.state, screen, best);
+    renderer.draw(world.state, screen, best, world.state.elapsed);
   }
 
-  // Leaving the tab pauses a running game rather than letting blocks fall unseen.
+  // Leaving the tab pauses a running game rather than letting the city move unseen.
   document.addEventListener('visibilitychange', () => {
     if (document.hidden && screen === SCREEN_PLAY) {
       screen = SCREEN_PAUSED;
@@ -126,7 +141,7 @@ function runGame() {
     }
   });
 
-  announce('Block Dodger. Press Space or click to start.');
+  announce('Leonida Nights. Press Space or click to start.');
   requestAnimationFrame(frame);
 }
 
